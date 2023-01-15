@@ -93,9 +93,10 @@ Celotna napaka: $D = Dn + Dm + Dz$
 ## Numerična stabilnost
 Stabilnost metode preverimo z analizo zaokrožitvenih napak.  
 
+**Naj bo $x$ točna vrednost, $\overline{x}$ pa približek zanjo.**
 Poznamo:
-- Absolutno napako: $X - X_{-}$
-- Relativno napako: $\frac{X - X_{-}}{X}$
+- Absolutno napako: $\overline{x} - x$
+- Relativno napako: $\frac{\overline{x} - x}{x}$
 - Direktno napako: Numerična napaka rezultata
 - Obrano napako: Koliko moramo spremeniti zečetne podatke, da dobimo **točen** rezultat enak temu, ki smo ga dobili (naš netočen rezultat).
 
@@ -414,7 +415,7 @@ TODO
 
 ## Sekantna metoda
 
-Pri sekantni metodi odvod nadomestimo s prejšnjima dvema približkoma ničle $\rarr x_{k-1}$ in $x_k$.  
+Pri sekantni metodi odvod nadomestimo s pomočjo prejšnjih dveh približkov ničle $\rarr x_{k-1}$ in $x_k$.  
 Za nov približek vzamemo točko v kateri sekanta skozi točki $x_k$ in $x_{k-1}$ seka x os. 
 
 Če je bila tangenta metoda $x = x_k - \frac{f(x_k)}{f'(x_k)}$, potem je sekantna metoda 
@@ -640,7 +641,7 @@ $c_1 = \frac{y_1 - c_0}{x_1 - x_0} = \frac{f(x_1) - f(x_0)}{x_1 - x_0}$
 $ c_2 = \frac{y_2 - c_0 - c_1(x_2-x_0)}{(x_2-x_0)(x_2-x_1)} = \frac{f(x_2) - f(x_0) - \frac{f(x_1) - f(x_0)}{x_1 - x_0}(x_2-x_0)}{(x_2-x_0)(x_2-x_1)}$
 
 #### Deljena diferenca $f[x_0, \dots, x_k]$
-Iz zhgrnjega primera opazimo, da se ponavljajo izrazi oblike:
+Iz zgornjega primera opazimo, da se ponavljajo izrazi oblike:
 
 $\frac{f(x_j) - f(x_i)}{x_j-x_i}$
 
@@ -649,4 +650,105 @@ $c_0 = f(x_0), c_1=f[x_0,x_1], c_2 = \frac{f[x_1,x_2] - f[x_0,x_1]}{x_2-x_0}$
 
 **To se da posplošiti do rekurzivnega računanja polinomov v Newtonovi obliki...**
 
+### Višje stopnje aproksimacije
+
+
+NEKI NEKI
+
+## Reševanje predoločenih sistemov
+
+Predoločen sistem je sistem, ki ima $m$ neznank in $n\ge m$ enačb. V tem primeru po vsej verjetnosti točna rešitev ne obstaja...  
+
+Zapisano drugače: Rešujemo sistem $Ax = b$ kjer je $A\isin \mathbb{R}^{n\times m}, n\ge m$ in $b \isin \mathbb{R}^n$, iščemo $x \isin \mathbb{R}^m$.
+
+Navadno nas zanima rešitev po metodi **najmanjših kvadratov**:
+
+Poišči $x \in \mathbb{R}^m$ ki minimizira $\|Ax-b\|_2$
+
+#### Kako rešiti tak sistem?
+Naj bo $rank(A) = m$. Rešitev ($x\isin \mathbb{R}^m$) po metodi najmanjših kvadratov:
+
+$A^TAx = A^Tb$
+
+$A^TA$ je kvadratna matrika velikosti $m\times m$
+$A^Tb$ je vektor velikosti $m\times 1$
+
+**Pozor**:
+- Ta metoda je numerično nestabilna. Problematične so matrike A, pri katerih stolpci niso dovolj linearno neodvisni.  
+- Ta problem rešujemo tako, da matriko A predstavimo s QR razcepom.
+
+$A=QR$
+Matlab v ozadju uporablja $QR$ razcep
+
+
+# Numerična integracija
+
+Naš cilj je izračunati določen integral funkcije $f(x)$:
+$\int_a^b f(x) dx = F(b) - F(a)$
+
+Tu je $F$ nedoločen integral funkcije $f$.
+
+Če nedoločenega integrala ne znamo izračunati smo v težavah, prav tako ne moramo integrala izračunati natančno, če imamo funkcijo podano samo na neki množici točk.
+
+## Osnovno trapezno pravilo in napaka E
+
+Funkcijo $f$ aproksimiramo z linearno funkcijo in izračunamo integral linearne funkcije.
+
+![](trapez.png)
+
+Velja:
+
+$\int_a^b f(x) dx \approx \int_a^b p(x) dx = f(a)(b-a) + \frac{f(a)-f(a)}{b-a} \frac{(b-a)^2}{2} = \frac{b-a}{2}(f(a) + f(b))$
+
+Napaka je:
+
+$E = \int_a^b (f(x) - p(x)) dx = \int_a^b f[a,b,x](x-b)(x-a)dx \newline
+= f[a,b,\zeta] \int_a^{a+h} (x-b)(x-a)dx \newline
+= \frac{f''(\eta)}{2}(-\frac{1}{6} (b-a)^3) \newline
+=- \frac{(b-a)^3 f''(\eta)}{12}$
+
+kjer sta $\zeta$ in $\eta$ $\isin [a,b]$.
+
+Uporaba formule: 
+Napka $E$ za nek $\eta \isin [a,b] \rArr E = - \frac{(b-a)^3 f''(\eta)}{12}$
+
+## Sestavljeno trapezno pravilo
+
+Če interval $[a,b]$ ni zelo kratek, potem z osnovnim trapeznim pravilom dobimo slabo aproksimacijo ploščine pod krivuljo.  
+
+
+Če interval $[a,b]$ razdelimo na $n$ enakih delov, s točkami $x_0, x_1, \dots, x_n$ dobimo intervale:
+$h := h_i = x_{i+1} - x_i$
+Na vsakem intervalu $h_i$ uporabimo osnovno trapezno pravilo in dobimo:
+$\int_a^b f(x) dx \approx \frac{h}{2}\sum_{i=0}^{n-1}(f(x_i) + f(x_{i+1}))\newline
+\bold{=\frac{h}{2} (f(x_0) + 2f(x_1) + 2f(x_2) + \dots + 2f(x_{n-1}) + f(x_n))}$
+
+Napaka $E_i$ na intervalu $[x_i, x_{i+1}]$ je:
+$E_i = - \frac{h^3 f''(\eta_i)}{12}$ za nek $\eta_i \isin [x_i, x_{i+1}]$
+
+Skupna napaka $E$ je:
+$E = \sum_{i=0}^{n-1} E_i = \sum_{i=0}^{n-1} - \frac{h^3 f''(\eta_i)}{12} = -n \frac{h^3 f''(\eta)}{12}\newline
+\bold{= - \frac{(b-a)h^2 f''(\eta)}{12}}$
+
+## Trapezno pravilo s kontrolo koraka
+Če uporabimo sestavljeno trapezno pravilo, moramo:
+- Vnaprej doloćiti velikost $h$.
+- Če želimo oceniti napako, moramo znait oceniti $f''(\eta)$ na intervalu $[a,b]$.
+
+Obe težavi rešimo z uporabo trapeznega pravila s kontrolo koraka.
+Hočemo, da program sam nastavi interval h.
+
+Če je $I = \int_a^bf(x) dx$ in $T(h)$ ocena za $I$ z uporabo trapeznega pravila z velikostjo $h$.
+
+Potem:
+
+$E(h) = T(h) - I = - \frac{(b-a)h^2 f''(\zeta)}{12}$
+
+**Želimo se izogniti dejstcu, da moramo poznati $f''$**:
+- Predpostavimo, da je $\frac{b-a}{12}f''(\zeta_h)$ približno enako $C$ za vse $h$. 
+$E(h) = Ch^2$
+$E(h/2) = C(h/2)^2 = C \frac{h^2}{4}$
+
+Dobimo:
+$I = T(h) - Ch^2 = T(h/2) - C \frac{h^2}{4}$
 
