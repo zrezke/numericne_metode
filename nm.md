@@ -744,7 +744,7 @@ Potem:
 
 $E(h) = T(h) - I = - \frac{(b-a)h^2 f''(\zeta)}{12}$
 
-**Želimo se izogniti dejstcu, da moramo poznati $f''$**:
+**Želimo se izogniti dejstvu, da moramo poznati $f''$**:
 - Predpostavimo, da je $\frac{b-a}{12}f''(\zeta_h)$ približno enako $C$ za vse $h$. 
 $E(h) = Ch^2$
 $E(h/2) = C(h/2)^2 = C \frac{h^2}{4}$
@@ -752,3 +752,110 @@ $E(h/2) = C(h/2)^2 = C \frac{h^2}{4}$
 Dobimo:
 $I = T(h) - Ch^2 = T(h/2) - C \frac{h^2}{4}$
 
+Kaj je konstanta $C$ tega seveda ne vemo, ker ne poznamo $f''$.
+Lahko pa izpostavimo Ch^2 in dobimo:
+$T(h) - Ch^2 = T(h/2) - C\frac{h^2}{4}$
+$\rArr T(h) - T(h/2) = Ch^2 - C\frac{h^2}{4}$
+$\rArr T(h) - T(h/2) = C(h^2 - \frac{h^2}{4})$
+$\rArr 4T(h) - 4T(H/2) = C(4h^2 - h^2)$
+$\rArr 4T(h) - 4T(H/2) = C3h^2$
+$\rArr \fbox{\(T(h) - T(h/2) = \frac{C3h^2}{4}\)}$
+$\rArr C3h^2 = 4(T(h) - T(h/2))$
+$\rArr \fbox{\(Ch^2 = \frac{4(T(h) - T(h/2))}{3}\)}$
+
+**Potem sta približka za napaki $E(h)$ in $E(h/2)$**:
+$\frac{4}{3}(T(h) - T(h/2))$ in $\frac{1}{3}(T(h/2) - T(h/4))$
+
+**Velja:**
+$T(h/2) = \frac{T(h)}{2} + \frac{h}{2} \sum_{i=0}^{n} f(a + (\frac{i-1}{2})h)$, pri čemer $n = \frac{b-a}{h}$
+
+**Algoritem:**
+- Izračunamo $T(b-a) = (b-a)\frac{f(a) + f(b)}{2}$
+- Izračunamo $T(\frac{b-a}{2}) = \frac{T(b-a)}{2} + \frac{b-a}{2} f(\frac{a+b}{2})$
+- Izračunamo napako: $\frac{1}{3}(T(b-a) - T(\frac{b-a}{2}))$, če je to dovolj majhno po aboslutni vrednosti, končamo. Približek za integral je $T(\frac{b-a}{2})$. Sicer ponovimo postopek s $h = \frac{h}{2}$.
+
+## Adaptivno trapezno pravilo
+Če uporabimo trapezno pravilo s kontrolo koraka, potem dolžine koraka $h$ ne določamo sami, je pa korak $h$ enak na celotnem intervalu. To je lahko potratno. Radi bi uporabili majhne $h$ le tam kjer je to res potrebno...
+
+To lahko dosežemo z uporabo **rekurzivnega računanja integrala**:
+- Najprej izračunamo $T(b-a)$ in $T(\frac{b-a}{2})$.
+-  Če je ocena napake $e:= \frac{1}{3}(T(b-a) - T(\frac{b-a}{2}))$ dovolj majhna, potem končamo in vrnemo $T(\frac{b-a}{2}) + e$.
+- Sicer postopek ločeno ponovimo za podintervala: $[a, \frac{a+b}{2}]$ in $[\frac{a+b}{2}, b]$, pri čemer naj bo napaka na vsakem največ polovica začetne tolerance.
+- Rekurzivno nadaljujemo zgornji postopek in dobimo oceno integrala, pri čemer delilne točke ne bodo enakomerno razporejene po intervalu $[a,b]$.
+
+
+## Enostavno simpsonovo pravilo
+Namesto s trapezom, za aproksimacijo integrala funkcije $f$ uporabimo polinom $p_2$ stopnje 2, s katerim interpoliramo točke:
+$(a,f(a)), (\frac{a+b}{2}, f(\frac{a+b}{2})), (b, f(b))$.
+
+$p_2(x) = C_0 + C_1 (x-a) + C_2 (x-a)(x-(\frac{a+b}{2}))$
+
+Funkcijski vrednosti $f(x)$ in $p_2(x)$ se morata ujemati v točkah $a$, $\frac{a+b}{2}$ in $b$:
+
+Označimo $h := \frac{b-a}{2}$ (h = polovica dolžine intervala $[a,b]$):
+Računamo $\int_a^{a+2h} p_2(x) dx$:
+$\rArr \fbox{\(\int_a^{a+2h} = \frac{h}{3} (f(a) + 4f(a+h) + f(a+2h))\)}$
+
+Napaka je približno:
+$\rArr \fbox{\(E(h) = -\frac{h^5}{90} f^{(4)}(\zeta_h)\)}$
+$\zeta \isin [a,b]$
+
+
+## Sestavljeno simpsonovo pravilo
+
+Interval $[a,b]$ razdelimo na sodo število enako dolgih intervalov $P = {x_0 = a < \dots < x_n = b}$ in na zaporednih trojicah točk uporabimo osnovno simpsonovo pravilo $(h = x_{i+1} - x_{i})$
+
+$\int_a^b f(x) dx = \sum_{i=0}^{\frac{n}{2}-1} \frac{h}{3} [f(x_{2i}) + 4f(x_{2i+1}) + f(x_{2i+2})]$
+$ = \fbox{\(\frac{h}{3} [f(x_0) + 4(f(x_1)) + 2(f(x_2)) + 4f(x_3) + 2f(x_4)+ \dots + f(x_n)]\)}$
+
+Menjata se le koeficienta $2$ in $4$...
+
+Napaka $E_i$ na intervalu $[x_{2i}, x_{2i+2}]$:
+$E_i = \frac{h^5}{90} f^{(4)}(\eta_i)$
+za $\eta_i \isin [x_{2i}, x_{2i+2}]$
+Skupna napaka:
+$E = \sum_{i=0}^{\frac{n}{2}-1} E_i$
+$\rArr E = \fbox{\(\frac{(b-a)h^44f''(\eta)}{180}\)}$
+
+## Adaptivno simpsonovo pravilo
+Isto kot pri adaptivnem trapeznom pravilu, le da uporabimo osnovno simpsonovo pravilo.
+
+todo
+
+## Osnovna Newton-Cortesova pravila
+
+Newton-Cortesova (NC) pravila interval $[a,b]$ razdelijo na $n+1$ ekvidistantnih točk. Interval $\int_a^b f(x) dx$ aproksimirajo z intervalom $\int_a^b p_n(x) dx$, kjer je $p_n$ interpolacijski polinom stopnje $n$, na teh točkah.
+
+### NC pravila
+#### Stopnja 1 (n=1) - Trapezno pravilo
+Formula: $\frac{(b-a)}{2} [f(a) + f(b)]$
+##### Napaka
+$E = -\frac{(b-a)h^2}{12} f''(\zeta)$
+$h = b-a$
+
+#### Stopnja 2 (n=2) - Simpsonovo pravilo 1/3
+Formula: $\frac{(b-a)}{6} [f(a) + 4f(\frac{a+b}{2}) + f(b)]$
+##### Napaka
+$E = -\frac{(b-a)h^4}{180} f^{(4)}(\zeta)$
+$h = \frac{b-a}{2}$
+
+#### Stopnja 3 (n=3) - Simpsonovo pravilo 3/8
+
+Formula: $\frac{(b-a)}{8} [f(a) + 3f(a+h) + 3f(b-h) + f(b)]$
+
+##### Napaka
+$E = -\frac{(b-a)h^4}{80} f^{(4)}(\zeta)$
+$h = \frac{b-a}{3}$
+
+#### Stopnja 4 (n=4) - Booleovo pravilo
+Formula: $\frac{(b-a)}{90} [7f(a) + 32f(a+h) + 12f(\frac{a+b}{2}) + 32f(b-h) + 7f(b)]$
+
+##### Napaka
+$E = -\frac{2(b-a)h^6}{945} f^{(6)}(\zeta)$
+$h = \frac{b-a}{4}$
+
+
+## Gaussove kvadraturne formule
+- NC pravila za integriranje so oblike: $\int_a^b f(x) dx \approx \sum_{j=0}^n w_j f(x_j)$, kjer so $x_j$ enakomerno razporejeni **vozli**, $w_j$ pa **uteži**.
+- Ekvidistančne točke niso vedno najboljša izbira, zato se bomo rešili ekvidistančnih vozlov v kvadraturnih formulah...
+- 
